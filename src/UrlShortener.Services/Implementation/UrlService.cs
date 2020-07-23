@@ -1,13 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Internal;
-using System;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using UrlShortener.Domain.Entities;
 using UrlShortener.Domain.ViewModels;
 using UrlShortener.Persistence.Contracts;
 using UrlShortener.Services.Contracts;
 using UrlShortener.Services.Exceptions;
+using UrlShortener.Services.Validators;
 
 namespace UrlShortener.Services.Implementation
 {
@@ -15,8 +13,6 @@ namespace UrlShortener.Services.Implementation
     {
         private readonly IUrlRepository _urlRepository;
         private readonly ICacheService _cacheService;
-
-        private const string URL_MATCH_REGEX = @"^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$";
 
         public UrlService(IUrlRepository urlRepository, ICacheService cacheService)
         {
@@ -55,18 +51,9 @@ namespace UrlShortener.Services.Implementation
         {
             var errors = new List<string>();
 
-            if(string.IsNullOrWhiteSpace(urlViewModel.OriginalUrl))
-            {
-                errors.Add("You must enter a URL");
-            }
-            if (string.IsNullOrWhiteSpace(urlViewModel.ShortUrl))
-            {
-                errors.Add("You must enter an alias");
-            }
-            if(!Regex.IsMatch(urlViewModel.OriginalUrl, URL_MATCH_REGEX))
-            {
-                errors.Add( "Provided URL is incorect");
-            }
+            var validator = new UrlValidator();
+            var result = validator.Validate(urlViewModel);
+            errors.AddRange(result.Errors?.Select(e => e.ErrorMessage));
 
             if (_cacheService.FindItem<string>(urlViewModel.ShortUrl) != null ||
                 _urlRepository.FindAsync(urlViewModel.ShortUrl) != null)
