@@ -37,6 +37,13 @@ namespace UrlShortener.Api
                          b => b.MigrationsAssembly(typeof(DataContext).Assembly.FullName)));
             }
 
+            services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
+            {
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+            }));
+
             services.AddControllers();
             services.AddMemoryCache();
 
@@ -56,6 +63,8 @@ namespace UrlShortener.Api
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors("CorsPolicy");
 
             app.UseEndpoints( endpoints =>
              {

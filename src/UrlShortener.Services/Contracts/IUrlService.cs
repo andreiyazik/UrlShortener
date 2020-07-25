@@ -7,6 +7,7 @@ namespace UrlShortener.Services.Contracts
     {
         Task CreateUrlAsync(UrlViewModel urlViewModel);
         Task<string> GetUrlByKeyAsync(string key);
+        Task<UrlViewModel> GetUrlDetailsByKeyAsync(string key);
         Task DeleteUrlAsync(string key);
     }
 }

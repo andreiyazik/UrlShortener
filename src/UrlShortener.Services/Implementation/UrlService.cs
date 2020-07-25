@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UrlShortener.Domain.Exceptions;
 using UrlShortener.Domain.ViewModels;
 using UrlShortener.Persistence.Contracts;
 using UrlShortener.Services.Contracts;
-using UrlShortener.Services.Exceptions;
 using UrlShortener.Services.Validators;
 
 namespace UrlShortener.Services.Implementation
@@ -22,7 +22,7 @@ namespace UrlShortener.Services.Implementation
 
         public async Task CreateUrlAsync(UrlViewModel urlViewModel)
         {
-            ValidateUrl(urlViewModel);
+            await ValidateUrl(urlViewModel);
             var urlEntity = urlViewModel.CreateEntity();
             await _urlRepository.CreateAsync(urlEntity);
             _cacheService.PutItem(urlEntity.ShortUrl, urlEntity.OriginalUrl);
@@ -47,7 +47,14 @@ namespace UrlShortener.Services.Implementation
             return urlEntity.OriginalUrl;
         }
 
-        private void ValidateUrl(UrlViewModel urlViewModel)
+        public async Task<UrlViewModel> GetUrlDetailsByKeyAsync(string key)
+        {
+            var originalUrl = await GetUrlByKeyAsync(key);
+
+            return new UrlViewModel { OriginalUrl = originalUrl, ShortUrl = key };
+        }
+
+        private async Task ValidateUrl(UrlViewModel urlViewModel)
         {
             var errors = new List<string>();
 
@@ -56,7 +63,7 @@ namespace UrlShortener.Services.Implementation
             errors.AddRange(result.Errors?.Select(e => e.ErrorMessage));
 
             if (_cacheService.FindItem<string>(urlViewModel.ShortUrl) != null ||
-                _urlRepository.FindAsync(urlViewModel.ShortUrl) != null)
+                await _urlRepository.FindAsync( urlViewModel.ShortUrl) != null)
             {
                 errors.Add("Alias already exists");
             }
@@ -64,6 +71,14 @@ namespace UrlShortener.Services.Implementation
             if (errors.Count > 0)
             {
                 throw new UrlValidationException("One or more errors occured", errors);
+            }
+        }
+
+        private void StandardiseUrl( UrlViewModel urlViewModel )
+        {
+            if(!urlViewModel.OriginalUrl.StartsWith("http"))
+            {
+                urlViewModel.OriginalUrl = $"http://{urlViewModel.OriginalUrl}";
             }
         }
     }

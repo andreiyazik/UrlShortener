@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using UrlShortener.Domain.Exceptions;
 using UrlShortener.Domain.ViewModels;
 using UrlShortener.Services.Contracts;
-using UrlShortener.Services.Exceptions;
 
 namespace UrlShortener.Api.Controllers
 {
@@ -25,11 +25,26 @@ namespace UrlShortener.Api.Controllers
             try
             {
                 var url = await _urlService.GetUrlByKeyAsync(key);
-                return RedirectPermanent(url);
+                return Redirect(url);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [Route("details/{key}")]
+        [HttpGet]
+        public async Task<IActionResult> GetUrlDetails(string key)
+        {
+            try
+            {
+                var details = await _urlService.GetUrlDetailsByKeyAsync(key);
+                return Ok(details);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest( ex.Message );
             }
         }
 
