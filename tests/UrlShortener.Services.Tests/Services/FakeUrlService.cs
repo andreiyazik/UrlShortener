@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UrlShortener.Domain.Entities;
+using UrlShortener.Domain.Exceptions;
 using UrlShortener.Domain.ViewModels;
 using UrlShortener.Services.Contracts;
-using UrlShortener.Services.Exceptions;
 using UrlShortener.Services.Validators;
 
 namespace UrlShortener.Services.Tests.Services
@@ -36,6 +36,11 @@ namespace UrlShortener.Services.Tests.Services
         {
             var urlEntity = GetUrlByKey(key);
             return Task.FromResult(urlEntity.OriginalUrl);
+        }
+
+        public Task<UrlViewModel> GetUrlDetailsByKeyAsync(string key)
+        {
+            throw new NotImplementedException();
         }
 
         private Url GetUrlByKey(string key)

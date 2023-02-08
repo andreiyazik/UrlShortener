@@ -1,7 +1,7 @@
 ## Technologies
-* .NET Core 3.1
-* ASP .NET Core 3.1
-* Entity Framework Core 3.1
+* .NET 6
+* ASP .NET 6
+* Entity Framework Core 6
 * React
 * FluentValidation
 * NUnit
